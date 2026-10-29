@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f5f0">
+  <title>Synthetic Market Lab</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Market Lab home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>QRS <span class="brand-slash">/</span> MARKET LAB</span></a>
+    <span class="header-tag">LOCAL SIMULATION <span class="status-dot"></span></span>
+  </header>
+
+  <div class="app-shell">
+    <aside id="market-controls" class="controls-panel" aria-label="Simulation controls">
+      <div class="sidebar-heading"><span class="eyebrow">01 / YOUR MARKET</span><h2>Set the conditions.</h2><p>Buyer and seller controls.</p></div>
+      <div class="preset-row" aria-label="Market presets">
+        <button type="button" data-preset="stable" class="preset active">Balanced</button>
+        <button type="button" data-preset="bullish" class="preset">Rising</button>
+        <button type="button" data-preset="volatile" class="preset">Volatile</button>
+      </div>
+      <form id="controls" autocomplete="off">
+        <section class="control-group buyer-group" aria-labelledby="buyers-heading">
+          <h3 id="buyers-heading"><span class="group-dot"></span>Buyers <span class="model-tag">GBM</span></h3>
+          <p class="group-description">How buyers' willingness to pay evolves.</p>
+          <div class="control"><div class="control-title"><label for="buyer_drift">Drift</label><output for="buyer_drift" id="buyer_drift_value">0.00%</output></div><input id="buyer_drift" type="range" min="-2" max="2" step="0.05" value="0"><div class="range-labels"><span>−2%</span><span>per minute</span><span>+2%</span></div></div>
+          <div class="control"><div class="control-title"><label for="buyer_volatility">Volatility</label><output for="buyer_volatility" id="buyer_volatility_value">0.60%</output></div><input id="buyer_volatility" type="range" min="0" max="2" step="0.05" value="0.6"><div class="range-labels"><span>Calm</span><span>per √minute</span><span>Uncertain</span></div></div>
+        </section>
+        <section class="control-group seller-group" aria-labelledby="sellers-heading">
+          <h3 id="sellers-heading"><span class="group-dot"></span>Sellers <span class="model-tag">OU</span></h3>
+          <p class="group-description">How sellers' desired prices evolve.</p>
+          <div class="control"><div class="control-title"><label for="seller_drift">Drift</label><output for="seller_drift" id="seller_drift_value">0.00%</output></div><input id="seller_drift" type="range" min="-2" max="2" step="0.05" value="0"><div class="range-labels"><span>−2%</span><span>per minute</span><span>+2%</span></div></div>
+          <div class="control"><div class="control-title"><label for="seller_volatility">Volatility</label><output for="seller_volatility" id="seller_volatility_value">0.60%</output></div><input id="seller_volatility" type="range" min="0" max="2" step="0.05" value="0.6"><div class="range-labels"><span>Calm</span><span>per √minute</span><span>Uncertain</span></div></div>
+          <div class="control"><div class="control-title"><label for="seller_mean_reversion">Return to anchor</label><output for="seller_mean_reversion" id="seller_mean_reversion_value">1.5 /min</output></div><input id="seller_mean_reversion" type="range" min="0.1" max="6" step="0.1" value="1.5"><div class="range-labels"><span>Gentle</span><span>mean reversion</span><span>Strong</span></div></div>
+        </section>
+        <section class="control-group balance-group" aria-labelledby="flow-heading">
+          <h3 id="flow-heading">Order flow</h3>
+          <div class="control"><div class="control-title"><label for="buyer_probability">Buyer share</label><output for="buyer_probability" id="buyer_probability_value">50%</output></div><input id="buyer_probability" type="range" min="5" max="95" step="1" value="50"><div class="range-labels"><span>More sellers</span><span>More buyers</span></div></div>
+        </section>
+        <section class="control-group execution-group" aria-labelledby="execution-heading">
+          <h3 id="execution-heading">Fees &amp; trading</h3>
+          <div class="control">
+            <div class="control-title"><label for="fee_bps">Venue commission</label><output for="fee_bps" id="fee_bps_value">1.0 bps</output></div>
+            <input id="fee_bps" type="range" min="0" max="100" step="0.1" value="1">
+            <div class="range-labels"><span>No fees</span><span>100 bps = 1%</span></div>
+            <p class="field-hint">Total per execution, split equally between buyer and seller. Set zero to remove commission.</p>
+          </div>
+          <div class="control">
+            <div class="control-title"><label for="max_trade_spread">Max spread to trade</label><output for="max_trade_spread" id="max_trade_spread_value">$1.00</output></div>
+            <input id="max_trade_spread" type="range" min="0" max="2" step="0.01" value="1">
+            <div class="range-labels"><span>$0 · no trades</span><span>$2.00 · wide</span></div>
+            <p id="spread-rule-help" class="field-hint">Spread must be at or below $1.00. An incoming order must also accept the opposite price.</p>
+          </div>
+        </section>
+        <details class="advanced"><summary>Advanced settings <span aria-hidden="true">+</span></summary>
+          <div class="advanced-content">
+            <label for="num_events">Event budget <span class="field-hint">Includes quotes and cancellations</span></label><input type="number" id="num_events" min="500" max="10000" step="500" value="3000">
+            <label for="seed">Random seed <span class="field-hint">Keep fixed to compare settings</span></label><input type="number" id="seed" min="0" max="2147483647" step="1" value="42">
+            <div class="control"><div class="control-title"><label for="cancellation_probability">Cancellations</label><output for="cancellation_probability" id="cancellation_probability_value">15%</output></div><input id="cancellation_probability" type="range" min="0" max="50" step="1" value="15"></div>
+            <div class="control"><div class="control-title"><label for="maker_half_spread_ticks">Maker half-spread</label><output for="maker_half_spread_ticks" id="maker_half_spread_ticks_value">3 ticks</output></div><input id="maker_half_spread_ticks" type="range" min="1" max="20" step="1" value="3"></div>
+            <label for="candle_seconds">Candle interval</label><select id="candle_seconds"><option value="1">1 second</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="30">30 seconds</option></select>
+          </div>
+        </details>
+        <button id="generate" class="button button-primary generate-button" type="submit"><span aria-hidden="true">↻</span> Generate market</button>
+        <p class="regeneration-note">Controls regenerate the run automatically with the same seed.</p>
+      </form>
+      <div class="education-note"><span class="note-icon" aria-hidden="true">i</span><p>Prices emerge from actual orders and matches. Candles contain executed trades only.</p></div>
+      <a class="mobile-controls-link button button-outline" href="#main-content">Back to chart ↑</a>
+    </aside>
+
+    <main id="main-content">
+      <div class="page-heading"><div><span class="eyebrow">A HANDS-ON ORDER BOOK EXPERIMENT</span><h1>Synthetic Market Lab<span class="title-dot">.</span></h1><p>Adjust order flow and replay the resulting trades.</p></div><a id="export" class="button button-outline disabled" aria-disabled="true"><span aria-hidden="true">↓</span> Export run</a></div>
+      <div id="error" class="error-banner" role="alert" hidden></div>
+      <a class="mobile-controls-link button button-outline" href="#market-controls">Adjust market controls ↓</a>
+      <div class="run-strip"><div><span id="run-status" class="run-status" role="status" aria-live="polite"><span class="status-dot"></span>Preparing your market…</span><span id="run-meta" class="run-meta"></span></div><span class="hardware-status"><span class="offline-dot"></span>ESP32 not connected <span class="hardware-detail">· replay file available</span></span></div>
+
+      <div class="market-grid">
+        <section class="card price-panel" aria-labelledby="price-heading">
+          <div class="card-top"><div><h2 id="price-heading">Synthetic stock <span class="instrument-tag">SYNTH</span></h2><div class="quote-row"><span id="last-price" class="main-price">—</span><span id="price-change" class="price-change">—</span></div></div><div class="quote-detail"><span>BEST BID / ASK</span><strong><span id="best-bid" class="buy-text">—</span><span class="quote-divider">/</span><span id="best-ask" class="sell-text">—</span></strong><span id="spread">Spread —</span></div></div>
+          <div class="chart-toolbar"><div class="legend"><span><i class="legend-line candle-key"></i>Trades <span id="interval-label">5s</span></span><span><i class="legend-line bid-key"></i>Bid</span><span><i class="legend-line ask-key"></i>Ask</span></div><span id="chart-hint" class="chart-hint">Hover to inspect candles</span></div>
+          <div class="price-chart-wrap"><canvas id="price-chart" aria-label="Executed-trade candlestick chart with best bid and ask over simulated time" role="img"></canvas><div id="chart-tooltip" class="chart-tooltip" hidden></div><div id="empty-chart" class="empty-chart">Generating your first market…</div><div id="busy-overlay" class="busy-overlay" hidden><span class="spinner"></span><span>Matching orders…</span></div></div>
+          <div class="replay-controls"><button id="play" class="play-button" type="button" disabled aria-label="Play simulation replay"><span aria-hidden="true">▶</span></button><button id="reset" class="reset-button" type="button" disabled title="Return to the beginning" aria-label="Reset replay">↶</button><label class="sr-only" for="timeline">Replay position</label><input id="timeline" type="range" min="-1" max="0" value="0" step="1" disabled><span id="replay-time" class="replay-time">00:00 <span>/ 05:00</span></span><label class="sr-only" for="replay-speed">Replay speed</label><select id="replay-speed" aria-label="Replay speed"><option value="1">1×</option><option value="5">5×</option><option value="15" selected>15×</option><option value="30">30×</option></select></div>
+          <div class="price-footer"><span id="replay-state">Full run preview</span><span id="trade-summary">— trades · — shares</span></div>
+        </section>
+
+        <section class="card depth-panel" aria-labelledby="depth-heading"><div class="depth-heading"><div><span class="eyebrow">THE ORDER BOOK</span><h2 id="depth-heading">Market depth</h2></div><span class="level-tag">10 levels</span></div><p class="depth-subtitle">Resting orders at this moment</p><div class="depth-columns"><span class="buy-text">BID <small>shares</small></span><span class="sell-text">ASK <small>shares</small></span></div><div id="depth-rows" class="depth-rows"></div><div class="depth-bottom"><span>Bid volume <b id="bid-depth">—</b></span><span>Ask volume <b id="ask-depth">—</b></span></div><p class="panel-caption">Bars compare size across the visible book.</p></section>
+      </div>
+
+      <div class="accounting-grid">
+        <section class="card maker-panel" aria-labelledby="maker-heading">
+          <div class="accounting-heading"><div><span class="eyebrow">02 / MARKET MAKER</span><h2 id="maker-heading">The quoting portfolio</h2></div><span class="subtle-tag">Marked to market</span></div>
+          <div class="pnl-row"><div><span class="metric-label">Profit / loss after commission</span><strong id="maker-pnl" class="accounting-value">—</strong></div></div>
+          <div class="pnl-legend"><span><i class="net-line"></i>After commission</span><span><i class="gross-line"></i>Without commission</span><span><i class="edge-line"></i>Spread contribution</span></div>
+          <div class="small-chart-wrap pnl-comparison"><canvas id="pnl-chart" aria-label="Market maker P&L before and after commission, and spread contribution, over simulated time" role="img"></canvas></div>
+          <div class="pnl-breakdown" aria-label="Market maker profit and loss breakdown">
+            <div><span>Spread contribution at fills</span><strong id="maker-trade-edge">—</strong></div>
+            <div><span>Inventory price changes</span><strong id="maker-inventory-revaluation">—</strong></div>
+            <div class="breakdown-subtotal"><span>P&amp;L without commission</span><strong id="maker-gross-pnl">—</strong></div>
+            <div><span>Maker commission paid</span><strong id="maker-fees-paid">—</strong></div>
+          </div>
+          <p class="panel-caption">Spread contribution measures each fill against the midpoint just before it. Inventory changes complete the P&amp;L; this is not realized round-trip profit.</p>
+          <div class="metric-grid portfolio-balances"><div><span class="metric-label">Cash</span><strong id="maker-cash">—</strong></div><div><span class="metric-label">Stock inventory</span><strong id="maker-inventory">—</strong></div><div><span class="metric-label">Portfolio equity</span><strong id="maker-equity">—</strong></div></div>
+          <p class="panel-caption">Cash + inventory × book midpoint; fees included. Borrowing and short positions allowed.</p>
+        </section>
+        <section class="card exchange-panel" aria-labelledby="exchange-heading"><div class="accounting-heading"><div><span class="eyebrow">03 / EXCHANGE</span><h2 id="exchange-heading">The venue's revenue</h2></div><span class="subtle-tag">Separate ledger</span></div><div class="pnl-row"><div><span class="metric-label">Cumulative trading fees</span><strong id="exchange-fees" class="accounting-value">—</strong></div><span class="mini-legend fee-legend"><i></i>Fees over time</span></div><div class="small-chart-wrap"><canvas id="fees-chart" aria-label="Exchange fee revenue over simulated time" role="img"></canvas></div><div class="metric-grid"><div><span class="metric-label">Executed trades</span><strong id="trade-count">—</strong></div><div><span class="metric-label">Shares traded</span><strong id="trade-volume">—</strong></div><div><span class="metric-label">Fee per trade</span><strong id="fee-rate">—</strong></div></div><p class="panel-caption">Total fees collected from both sides. Operating costs are not modeled.</p></section>
+      </div>
+      <div class="spread-status-panel" aria-live="polite"><span id="spread-gate-status">Spread threshold —</span><span id="blocked-orders">Orders made passive by threshold: —</span></div>
+      <footer class="main-footer"><span><span class="footer-dot"></span>Educational simulation · USD · simulated 5-minute session</span><span id="validation-status">Matching engine checks pending</span></footer>
+    </main>
+  </div>
+</body>
+</html>
