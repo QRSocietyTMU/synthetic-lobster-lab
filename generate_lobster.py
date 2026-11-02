@@ -577,6 +577,13 @@ def export_result(result: dict, directory, include_xlsx: bool = True) -> dict:
             workbook_path = directory / "SYNTH_market_data.xlsx"
             workbook.save(workbook_path)
             files.append(str(workbook_path))
+    quotes_path = directory / "SYNTH_bid_ask_time.csv"
+    with quotes_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(("BID", "ASK", "Time"))
+        for index, snapshot in enumerate(result["orderbook"]):
+            writer.writerow((f"{snapshot[2] / 10000:.4f}", f"{snapshot[0] / 10000:.4f}", index))
+    files.append(str(quotes_path))
     return {"directory": str(directory), "files": files}
 
 

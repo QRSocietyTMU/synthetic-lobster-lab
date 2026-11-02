@@ -103,6 +103,8 @@ Maker fees are deducted from cash only when the maker participates in a fill. Th
 
 ## Outputs and compatibility
 
+The last file in **Export run** is `SYNTH_bid_ask_time.csv`. Its only columns are `BID,ASK,Time`: the best bid and ask in dollars after each book event, followed by a row index starting at 0. Repeated quotes are retained.
+
 - `SYNTH_message_10.csv`: no headers or index; six columns: time, type, order ID, shares, integer price, resting side.
 - `SYNTH_orderbook_10.csv`: no headers or index; forty columns: ask price, ask size, bid price, bid size, repeated for ten occupied levels.
 - `SYNTH_market_data.xlsx`: numeric `message` and `orderbook` sheets with the same rows and no headers.

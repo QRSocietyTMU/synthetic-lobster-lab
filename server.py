@@ -145,12 +145,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return self.send_json({"error": "This run has expired. Generate it again, then export."}, 404)
         try:
             with tempfile.TemporaryDirectory(prefix="lobster-export-") as folder:
-                export_result(result, folder, include_xlsx=True)
+                exported = export_result(result, folder, include_xlsx=True)
                 archive = io.BytesIO()
                 with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as output:
-                    for path in sorted(Path(folder).iterdir()):
-                        if path.is_file():
-                            output.write(path, path.name)
+                    for path in exported["files"]:
+                        output.write(path, Path(path).name)
                 self.send_bytes(archive.getvalue(), "application/zip", filename="synthetic-market.zip")
         except Exception as exc:
             print(f"Export failed: {type(exc).__name__}: {exc}", flush=True)

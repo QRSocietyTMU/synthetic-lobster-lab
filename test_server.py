@@ -63,6 +63,14 @@ class DashboardAPITests(unittest.TestCase):
         names = archive.namelist()
         for name in ("SYNTH_message_10.csv", "SYNTH_orderbook_10.csv", "SYNTH_market_data.xlsx"):
             self.assertIn(name, names)
+        self.assertEqual(names[-1], "SYNTH_bid_ask_time.csv")
+        rows = archive.read(names[-1]).decode().splitlines()
+        self.assertEqual(rows[0], "BID,ASK,Time")
+        self.assertEqual(len(rows) - 1, len(run["events"]))
+        for index, (row, event) in enumerate(zip(rows[1:], run["events"])):
+            bid, ask, time = row.split(",")
+            self.assertEqual((float(bid), float(ask), time),
+                             (event["best_bid"], event["best_ask"], str(index)))
         messages = archive.read("SYNTH_message_10.csv").decode().splitlines()
         self.assertEqual(len(messages), 200)
         self.assertEqual(len(messages[0].split(",")), 6)
