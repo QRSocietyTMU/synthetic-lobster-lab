@@ -103,6 +103,8 @@ Maker fees are deducted from cash only when the maker participates in a fill. Th
 
 ## Outputs and compatibility
 
+[Open the example bid/ask CSV](examples/SYNTH_bid_ask_time.csv) to see all 3,000 rows of a default run.
+
 The last file in **Export run** is `SYNTH_bid_ask_time.csv`. Its only columns are `BID,ASK,Time`: the best bid and ask in dollars after each book event, followed by a row index starting at 0. Repeated quotes are retained.
 
 - `SYNTH_message_10.csv`: no headers or index; six columns: time, type, order ID, shares, integer price, resting side.
